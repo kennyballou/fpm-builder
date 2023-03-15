@@ -1,4 +1,4 @@
-FROM centos:7.3.1611
+FROM quay.io/centos/centos:stream9
 
 RUN set -x && \
     yum -y group install \
