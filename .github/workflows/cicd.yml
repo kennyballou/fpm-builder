@@ -1,0 +1,35 @@
+---
+
+name: Build and Push Image
+
+on: [ push ]
+jobs:
+  build:
+    name: build and push image
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build Image
+      id: build-image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: fpm-builder
+        tags: latest ${{ github.sha }}
+        containerfiles: |
+          ./Dockerfile
+
+    - name: Push to GHCR
+      id: push-to-ghcr
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: ghcr.io/kennyballou
+        username: kennyballou
+        password: ${{ github.token }}
+
+    - name: Echo outputs
+      run: |
+        echo "${{ toJSON(steps.push-to-ghcr.outputs) }}"
