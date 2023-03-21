@@ -18,7 +18,16 @@ jobs:
         image: fpm-builder
         tags: latest ${{ github.sha }}
         containerfiles: |
-          ./Dockerfile
+          ./centos9/Containerfile
+
+    - name: Build Image CentOS 8
+      id: build-image-centos8
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: fpm-builder
+        tags: centos8
+        containerfiles: |
+          ./centos8/Containerfile
 
     - name: Push to GHCR
       id: push-to-ghcr
@@ -30,6 +39,17 @@ jobs:
         username: kennyballou
         password: ${{ github.token }}
 
+    - name: Push CentOS8 to GHCR
+      id: push-to-ghcr-centos8
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image-centos8.outputs.image }}
+        tags: ${{ steps.build-image-centos8.outputs.tags }}
+        registry: ghcr.io/kennyballou
+        username: kennyballou
+        password: ${{ github.token }}
+
     - name: Echo outputs
       run: |
         echo "${{ toJSON(steps.push-to-ghcr.outputs) }}"
+        echo "${{ toJSON(stesp.push-to-ghcr-centos8.outputs) }}"
